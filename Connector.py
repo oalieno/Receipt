@@ -95,7 +95,7 @@ class Connector(object):
             if unknown >= 5:
                 break
             if money != 0:
-                receipt[_ABC+str(_123+i)] = (date,money)
+                receipt[_ABC+str(_123+i)] = [date,money]
         return receipt
 
 if __name__ == '__main__':

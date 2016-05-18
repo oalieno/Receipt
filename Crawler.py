@@ -1,31 +1,30 @@
 import socket
-import cPickle as pickle
+import json
 import logging as log
 from Connector import Connector
 
 C = Connector()
 
-host = 'localhost'
-port = 5555
+server = ('localhost',5555)
 
-s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-s.bind((host,port))
-s.listen(1)
+sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+sock.bind(server)
+sock.listen(1)
 
 while True:
-    connection,address = s.accept()
+    connection,address = sock.accept()
     try:
         log.debug("Connect to {}".format(address))
         while True:
             data = connection.recv(256)
             if data:
                 _data = data.strip().split()
-                if len(_data) != 3:
+                if len(_data) != 3 or len(_data[0]) != 10 or len(_data[1]) != 9:
                     connection.sendall("=====Wrong Format=====\nShould be(ReceiptId,Date,HowMany)\n")
                     continue
                 log.debug("Recieve task : {} {} {}".format(_data[0],_data[1],_data[2]))
                 receipt = C.Task(_data[0],_data[1],int(_data[2]))
-                connection.sendall(pickle.dumps(receipt,-1))
+                connection.sendall(json.dumps(receipt))
             else:
                 print "no more data"
                 break
