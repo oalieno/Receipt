@@ -1,5 +1,9 @@
 import socket
+import cPickle as pickle
+import logging as log
 from Connector import Connector
+
+C = Connector()
 
 host = 'localhost'
 port = 5555
@@ -8,21 +12,20 @@ s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 s.bind((host,port))
 s.listen(1)
 
-C = Connector()
-
 while True:
     connection,address = s.accept()
     try:
-        print "Connect to",address
+        log.debug("Connect to {}".format(address))
         while True:
             data = connection.recv(256)
             if data:
                 _data = data.strip().split()
-                if len(_data) != 4:
+                if len(_data) != 3:
+                    connection.sendall("=====Wrong Format=====\nShould be(ReceiptId,Date,HowMany)\n")
                     continue
-                print _data
-                money,hole = C.Task(_data[0],_data[1],int(_data[2]),int(_data[3]))
-                connection.sendall("money : "+str(money)+" hole : "+str(hole))
+                log.debug("Recieve task : {} {} {}".format(_data[0],_data[1],_data[2]))
+                receipt = C.Task(_data[0],_data[1],int(_data[2]))
+                connection.sendall(pickle.dumps(receipt,-1))
             else:
                 print "no more data"
                 break

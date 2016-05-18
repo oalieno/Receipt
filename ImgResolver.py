@@ -1,4 +1,5 @@
 import os
+import re
 import logging as log
 from PIL import Image,ImageEnhance
 
@@ -22,5 +23,9 @@ class ImgResolver(object):
         img = enhancer.enhance(0.0)
         img.save("image.jpeg")
         #Enhance image
-        captcha = os.popen("tesseract -l eng image.jpeg stdout").read()
-        return captcha.strip()
+        captcha = os.popen("tesseract -l eng image.jpeg stdout").read().strip()
+        log.debug("regex match : {}".format(re.match("\w{5}",captcha)))
+        if len(captcha) == 5 and re.match("\w{5}",captcha):
+            return captcha
+        else:
+            return None

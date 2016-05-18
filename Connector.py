@@ -45,8 +45,11 @@ class Connector(object):
                 self.headers['Cookie'] = header[1]
 		break
         self.postData['txtQryImageCode'] = self.imgresolver.solve(res.read())
-        log.debug("Cookie : {}".format(self.headers['Cookie']))
-	log.debug("Captcha : {}".format(self.postData['txtQryImageCode']))
+        if self.postData['txtQryImageCode'] == None:
+            return False
+        log.debug("Set Cookie : {}".format(self.headers['Cookie']))
+	log.debug("Set Captcha : {}".format(self.postData['txtQryImageCode']))
+        return True
 
     def Post(self):
         params = urllib.urlencode(self.postData)
@@ -65,29 +68,35 @@ class Connector(object):
         self.postData['publicAuditVO.invoiceDate'] = date
         success,money = self.htmlresolver.solve(self.Post())
         while not success:
-            self.Get()
+            while not self.Get():
+                pass
             success,money = self.htmlresolver.solve(self.Post())
+        log.debug("success : {} money : {}".format(success,money))
         return money
 
-    def Task(self,number,date,direction,distance):
-        total = 0
-        hole = 0
+    def Task(self,number,date,distance):
+        receipt = {}
+        unknown = 0
         _ABC = number[:2]
         _123 = int(number[2:])
         for i in range(distance):
-            money = self.Hack(_ABC+str(_123+i*direction),date)
+            money = self.Hack(_ABC+str(_123+i),date)
             if money == 0:
+                log.debug("=====date modify=====")
                 someday = datetime.datetime.strptime(str(int(date[0:3])+1991)+date[3:],"%Y/%m/%d")
-                someday = someday + datetime.timedelta(days = direction)
+                someday = someday + datetime.timedelta(days = 1)
                 _date = str(int(someday.strftime("%Y/%m/%d")[0:4])-1991)+someday.strftime("%Y/%m/%d")[4:]
-                print "date modify"
-                money = self.Hack(_ABC+str(_123+i*direction),_date)
+                #retry
+                money = self.Hack(_ABC+str(_123+i),_date)
                 if money != 0:
                     date = _date
                 else:
-                    hole += 1
-            total += money
-        return total,hole
+                    unknown += 1
+            if unknown >= 5:
+                break
+            if money != 0:
+                receipt[_ABC+str(_123+i)] = (date,money)
+        return receipt
 
 if __name__ == '__main__':
     log.basicConfig(level = log.INFO)
@@ -95,4 +104,4 @@ if __name__ == '__main__':
     print "Welcome to Receipt Crawlers World!!"
     number = raw_input("Number:").strip()
     date = raw_input("Date:").strip()
-    C.Task(number,date,1,10)
+    C.Task(number,date,10)
