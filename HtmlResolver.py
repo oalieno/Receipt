@@ -13,4 +13,4 @@ class HtmlResolver(object):
         elif len(data) == 3:
             return True,0
         else:
-            return True,(soup.select(".lpTb tr")[1]).select("td")[4].text.strip()
+            return True,int((soup.select(".lpTb tr")[1]).select("td")[4].text.strip())
