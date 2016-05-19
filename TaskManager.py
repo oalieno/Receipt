@@ -1,11 +1,12 @@
 import socket
 import json
 import logging as log
+from DBManager import DBManager
 
 class TaskManager(object):
 
     def __init(self):
-        self.receipt = {}
+        self.dbmanager = DBManager()
 
     def AssignTask(self,number,date,distance):
         server = ('localhost',5555)
@@ -13,9 +14,10 @@ class TaskManager(object):
         sock.connect(server)
         try:
             sock.sendall("{} {} {}".format(number,date,str(distance)))
-            self.receipt = json.loads(sock.recv(4096))
+            receipt = json.loads(sock.recv(4096))
             sock.close()
-            log.debug(self.receipt)
+            log.debug(receipt)
+            self.dbmanager.StoreData(receipt)
         except socket.error as e:
             sock.close()
             print "shit happened {}".format(e)    
