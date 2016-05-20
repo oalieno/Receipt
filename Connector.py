@@ -44,7 +44,7 @@ class Connector(object):
             if header[0] == "set-cookie":
                 self.headers['Cookie'] = header[1]
 		break
-        self.postData['txtQryImageCode'] = self.imgresolver.solve(res.read())
+        self.postData['txtQryImageCode'] = self.imgresolver.Solve(res.read())
         if self.postData['txtQryImageCode'] == None:
             return False
         log.debug("Set Cookie : {}".format(self.headers['Cookie']))
@@ -71,6 +71,7 @@ class Connector(object):
             while not self.Get():
                 pass
             success,money = self.htmlresolver.solve(self.Post())
+        self.imgresolver.Store()
         log.debug("success : {} money : {}".format(success,money))
         return money
 
