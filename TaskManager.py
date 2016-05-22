@@ -4,8 +4,7 @@ import logging as log
 from DBManager import DBManager
 
 class TaskManager(object):
-
-    def __init(self):
+    def __init__(self):
         self.dbmanager = DBManager()
 
     def AssignTask(self,number,date,distance):
@@ -15,13 +14,14 @@ class TaskManager(object):
         try:
             sock.sendall("{} {} {}".format(number,date,str(distance)))
             receipt = json.loads(sock.recv(4096))
-            sock.close()
             log.debug(receipt)
+            sock.close()
             self.dbmanager.StoreData(receipt)
         except socket.error as e:
             sock.close()
             print "shit happened {}".format(e)    
 
 if __name__ == '__main__':
+    log.basicConfig(level = log.DEBUG)
     T = TaskManager()
     T.AssignTask("HB22675221","105/05/15",10)

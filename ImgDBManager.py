@@ -17,4 +17,5 @@ class ImgDBManager(object):
 
 if __name__ == '__main__':
     D = ImgDBManager()
-    D.CreateTable()
+    D.c.execute("SELECT * FROM image")
+    print D.c.fetchall()

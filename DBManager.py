@@ -6,11 +6,11 @@ class DBManager(object):
         self.c = self.conn.cursor()
     def CreateTable(self):
         self.c.execute("CREATE TABLE if not exists receipt (id TEXT, date TEXT, money INTEGER)")
-    def StoreData(self,table,data):
+    def StoreData(self,data):
         for key in data: 
-            self.c.execute("SELECT * FROM {} WHERE id == '{}'".format(table,key))
+            self.c.execute("SELECT * FROM receipt WHERE id == '{}'".format(key))
             if self.c.fetchone() == None:
-                self.c.execute("INSERT INTO {} VALUES ('{}','{}',{})".format(table,key,receipt[key][0],receipt[key][1]))
+                self.c.execute("INSERT INTO receipt VALUES ('{}','{}',{})".format(key,data[key][0],data[key][1]))
         self.conn.commit()
 
 if __name__ == '__main__':
