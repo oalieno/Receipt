@@ -19,11 +19,11 @@ while True:
             data = connection.recv(256)
             if data:
                 _data = data.strip().split()
-                if len(_data) != 3 or len(_data[0]) != 10 or len(_data[1]) != 9:
+                if len(_data) != 5 or len(_data[0]) != 10 or len(_data[1]) != 9:
                     connection.sendall("=====Wrong Format=====\nShould be(ReceiptId,Date,HowMany)\n")
                     continue
-                log.debug("Recieve task : {} {} {}".format(_data[0],_data[1],_data[2]))
-                receipt = C.Task(_data[0],_data[1],int(_data[2]))
+                log.debug("Recieve task : {} {} {} {} {}".format(_data[0],_data[1],_data[2],_data[3],_data[4]))
+                receipt = C.Task(_data[0],_data[1],int(_data[2]),int(_data[3]),int(_data[4]))
                 connection.sendall(json.dumps(receipt))
             else:
                 print "no more data"

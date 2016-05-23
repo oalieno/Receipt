@@ -75,20 +75,20 @@ class Connector(object):
         log.debug("success : {} money : {}".format(success,money))
         return money
 
-    def Task(self,number,date,distance):
+    def Task(self,number,date,direction,shift,distance):
         receipt = {}
         unknown = 0
         _ABC = number[:2]
         _123 = int(number[2:])
-        for i in range(distance):
-            money = self.Hack(_ABC+str(_123+i),date)
+        for i in range(shift,shift+distance):
+            money = self.Hack(_ABC+str(_123+i*direction),date)
             if money == 0:
                 log.debug("=====date modify=====")
                 someday = datetime.datetime.strptime(str(int(date[0:3])+1991)+date[3:],"%Y/%m/%d")
                 someday = someday + datetime.timedelta(days = 1)
                 _date = str(int(someday.strftime("%Y/%m/%d")[0:4])-1991)+someday.strftime("%Y/%m/%d")[4:]
                 #retry
-                money = self.Hack(_ABC+str(_123+i),_date)
+                money = self.Hack(_ABC+str(_123+i*direction),_date)
                 if money != 0:
                     date = _date
                 else:
@@ -96,7 +96,7 @@ class Connector(object):
             if unknown >= 5:
                 break
             if money != 0:
-                receipt[_ABC+str(_123+i)] = [date,money]
+                receipt[_ABC+str(_123+i*direction)] = [date,money]
         return receipt
 
 if __name__ == '__main__':
@@ -105,4 +105,4 @@ if __name__ == '__main__':
     print "Welcome to Receipt Crawlers World!!"
     number = raw_input("Number:").strip()
     date = raw_input("Date:").strip()
-    C.Task(number,date,10)
+    C.Task(number,date,1,0,10)
