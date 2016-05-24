@@ -2,7 +2,7 @@ import sqlite3
 
 class ImgDBManager(object):
     def __init__(self):
-        self.conn = sqlite3.connect("image.db")
+        self.conn = sqlite3.connect("DB/image.db")
         self.c = self.conn.cursor()
     def CreateTable(self):
         self.c.execute("CREATE TABLE if not exists image (id TEXT, captcha)")

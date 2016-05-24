@@ -14,7 +14,7 @@ sock.listen(1)
 while True:
     connection,address = sock.accept()
     try:
-        log.debug("Connect to {}".format(address))
+        print "Connect to {}".format(address)
         while True:
             data = connection.recv(256)
             if data:
@@ -22,9 +22,10 @@ while True:
                 if len(_data) != 5 or len(_data[0]) != 10 or len(_data[1]) != 9:
                     connection.sendall("=====Wrong Format=====\nShould be(ReceiptId,Date,HowMany)\n")
                     continue
-                log.debug("Recieve task : {} {} {} {} {}".format(_data[0],_data[1],_data[2],_data[3],_data[4]))
+                print "Recieve task : {} {} {} {} {}".format(_data[0],_data[1],_data[2],_data[3],_data[4])
                 receipt = C.Task(_data[0],_data[1],int(_data[2]),int(_data[3]),int(_data[4]))
                 connection.sendall(json.dumps(receipt))
+                print "Task done!!"
             else:
                 print "no more data"
                 break

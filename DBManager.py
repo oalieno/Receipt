@@ -2,7 +2,7 @@ import sqlite3
 
 class DBManager(object):
     def __init__(self):
-        self.conn = sqlite3.connect("receipt.db")
+        self.conn = sqlite3.connect("DB/receipt.db")
         self.c = self.conn.cursor()
     def CreateTable(self):
         self.c.execute("CREATE TABLE if not exists receipt (id TEXT, date TEXT, money INTEGER)")

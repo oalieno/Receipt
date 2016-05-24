@@ -2,7 +2,7 @@ import httplib
 import urllib
 import os
 import logging as log
-import datetime
+from TimeConvert import TimeConvert
 from ImgResolver import ImgResolver
 from HtmlResolver import HtmlResolver
 
@@ -84,9 +84,10 @@ class Connector(object):
             money = self.Hack(_ABC+str(_123+i*direction),date)
             if money == 0:
                 log.debug("=====date modify=====")
-                someday = datetime.datetime.strptime(str(int(date[0:3])+1991)+date[3:],"%Y/%m/%d")
-                someday = someday + datetime.timedelta(days = 1)
-                _date = str(int(someday.strftime("%Y/%m/%d")[0:4])-1991)+someday.strftime("%Y/%m/%d")[4:]
+                #someday = datetime.datetime.strptime(str(int(date[0:3])+1991)+date[3:],"%Y/%m/%d")
+                #someday = someday + datetime.timedelta(days = 1)
+                #_date = str(int(someday.strftime("%Y/%m/%d")[0:4])-1991)+someday.strftime("%Y/%m/%d")[4:]
+                _date = TimeConvert(date,direction)
                 #retry
                 money = self.Hack(_ABC+str(_123+i*direction),_date)
                 if money != 0:
