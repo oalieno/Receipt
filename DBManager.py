@@ -15,5 +15,7 @@ class DBManager(object):
 
 if __name__ == '__main__':
     D = DBManager()
-    D.c.execute("SELECT * FROM receipt")
-    print D.c.fetchall()
+    D.c.execute("SELECT COUNT(*) FROM receipt")
+    print "=====Total : ",D.c.fetchone(),"====="
+    #D.c.execute("SELECT * FROM receipt")
+    #print D.c.fetchall()

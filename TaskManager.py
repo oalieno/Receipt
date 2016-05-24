@@ -11,6 +11,7 @@ class TaskManager(object):
     def __init__(self):
         self.dbmanager = DBManager()
         self.taskdbmanager = TaskDBManager()
+        self.current = (0,)
     
     def Connect(self):
         server = ('localhost',5555)
@@ -27,7 +28,8 @@ class TaskManager(object):
                 receipt = json.loads(data)
             except:
                 print data
-            log.debug(data)
+                return -1,0
+            log.debug("receive : "+data)
             if len(receipt) >= distance-5:
                 success = 1
             if receipt.get(number[0:2]+str(int(number[2:])+shift+distance-1),date)[0] != date:
@@ -50,8 +52,11 @@ class TaskManager(object):
         try:
             while not q.empty():
                 wow = q.get()
+                self.current = wow
                 print "Assign Task:{} {} {} {} {}".format(wow[0],wow[1],wow[2],wow[3],wow[4])
                 s,d = self.AssignTask(wow[0],wow[1],wow[2],wow[3],wow[4])
+                if s == -1:
+                    raise
                 if s:
                     print "Success!!Add new Task~"
                     q.put((wow[0],TimeConvert(wow[1],d),wow[2],wow[3]+wow[4],wow[4]))
@@ -61,7 +66,7 @@ class TaskManager(object):
                 self.taskdbmanager.Clear()
                 print "=====All done====="
         except:
-            L = []
+            L = [self.current]
             while not q.empty():
                 L.append(q.get())
             print L
@@ -74,5 +79,4 @@ if __name__ == '__main__':
     T = TaskManager()
     T.Connect()
     T.Run()
-    #T.AssignTask("HB22675221","105/05/15",1,0,10)
     T.Close()
