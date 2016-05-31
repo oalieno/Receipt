@@ -13,7 +13,7 @@ while True:
         if len(date) != 9 or date[3] != '/' or date[6] != '/':
             print "format wrong"
             continue
-        taskdbmanager.StoreAll([(number,date,1,0,100),(number,date,-1,0,100)])
+        taskdbmanager.StoreAll([(number,date,1,0,10),(number,date,-1,0,10)])
     except KeyboardInterrupt:
         print "\n~~~~~Bye~~~~~"
         break

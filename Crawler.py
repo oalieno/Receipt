@@ -8,30 +8,20 @@ C = Connector()
 server = ('localhost',5555)
 
 sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-sock.bind(server)
-sock.listen(1)
+sock.connect(server)
 
-while True:
-    connection,address = sock.accept()
-    try:
-        print "Connect to {}".format(address)
-        while True:
-            data = connection.recv(256)
-            if data:
-                _data = data.strip().split()
-                if len(_data) != 5 or len(_data[0]) != 10 or len(_data[1]) != 9:
-                    connection.sendall("=====Wrong Format=====\nShould be(ReceiptId,Date,HowMany)\n")
-                    continue
-                print "Recieve task : {} {} {} {} {}".format(_data[0],_data[1],_data[2],_data[3],_data[4])
-                receipt = C.Task(_data[0],_data[1],int(_data[2]),int(_data[3]),int(_data[4]))
-                connection.sendall(json.dumps(receipt))
-                print "Task done!!"
-            else:
-                print "no more data"
-                break
-        connection.close()
-        break
-    except:
-        print "error happened shit happened"
-        connection.close()
-        break
+size = 1024
+try:
+    print "Connecting..."
+    while True:
+        data = sock.recv(size)
+        data = data.strip().split()
+        if len(data) != 5 or len(data[0]) != 10 or len(data[1]) != 9:
+            continue
+        print "Recieve task : {} {} {} {} {}".format(data[0],data[1],data[2],data[3],data[4])
+        receipt = C.Task(data[0],data[1],int(data[2]),int(data[3]),int(data[4]))
+        sock.sendall(json.dumps(receipt))
+        print "Task done!!"
+except:
+    print "\nSomething Happened... Crawler Closed"
+    sock.close()

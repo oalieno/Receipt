@@ -1,7 +1,9 @@
 import socket
+import threading
 import json
 import sys
 import Queue
+import time
 import logging as log
 from TimeConvert import TimeConvert
 from DBManager import DBManager
@@ -9,74 +11,97 @@ from TaskDBManager import TaskDBManager
 
 class TaskManager(object):
     def __init__(self):
-        self.dbmanager = DBManager()
+        self.qdb = Queue.Queue()
+        self.qdb_lock = threading.Lock()
         self.taskdbmanager = TaskDBManager()
-        self.current = (0,)
-    
-    def Connect(self):
-        server = ('localhost',5555)
+        self.current = {}
+        self.current_lock = threading.Lock()
         self.sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-        self.sock.connect(server)
+        self.sock.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
+        self.sock.bind(('localhost',5555))
+        self.q = Queue.Queue()
+        self.queue_lock = threading.Lock()
+        for i in self.taskdbmanager.GetData():
+            self.q.put((i[0].encode('ascii','ignore'),i[1].encode('ascii','ignore'),i[2],i[3],i[4]))
 
-    def AssignTask(self,number,date,direction,shift,distance):
-        success = 0
-        datemodify = 0
-        try:
-            self.sock.sendall("{} {} {} {} {}".format(number,date,str(direction),str(shift),str(distance)))
-            data = self.sock.recv(4096)
-            try:
-                receipt = json.loads(data)
-            except:
-                print data
-                return -1,0
-            log.debug("receive : "+data)
-            if len(receipt) >= distance-5:
-                success = 1
-            if receipt.get(number[0:2]+str(int(number[2:])+shift+distance-1),date)[0] != date:
-                datemodify = direction
-            self.dbmanager.StoreData(receipt)
-        except socket.error as e:
-            self.Close()
-            print "shit happened {}".format(e)    
-        return success,datemodify
+    def DB(self):
+        dbmanager = DBManager()
+        while True:
+            time.sleep(1)
+            with self.qdb_lock:
+                if not self.qdb.empty():
+                    receipt = self.qdb.get()
+                    dbmanager.StoreData(receipt)
 
-    def Close(self):
-        self.sock.close()
-   
-    def Run(self):
-        q = Queue.Queue()
-        data = self.taskdbmanager.GetData()
-        for i in data:
-            i = (i[0].encode('ascii','ignore'),i[1].encode('ascii','ignore'),i[2],i[3],i[4])
-            q.put(i)
+    def Listen(self):
+        t = threading.Thread(target = self.DB)
+        t.daemon = True
+        t.start()
         try:
-            while not q.empty():
-                wow = q.get()
-                self.current = wow
-                print "Assign Task:{} {} {} {} {}".format(wow[0],wow[1],wow[2],wow[3],wow[4])
-                s,d = self.AssignTask(wow[0],wow[1],wow[2],wow[3],wow[4])
-                if s == -1:
-                    raise
-                if s:
-                    print "Success!!Add new Task~"
-                    q.put((wow[0],TimeConvert(wow[1],d),wow[2],wow[3]+wow[4],wow[4]))
-                else:
-                    print "Fail!!Reach the end!!"
-            else:
-                self.taskdbmanager.Clear()
-                print "=====All done====="
+            self.sock.listen(5)
+            while True:
+                client,address = self.sock.accept()
+                #client.settimeout(300)
+                t = threading.Thread(target = self.ListenToClient,args = (client,address))
+                t.daemon = True
+                t.start()
         except:
-            L = [self.current]
-            while not q.empty():
-                L.append(q.get())
-            print L
+            L = []
+            if not self.q.empty():
+                for key in self.current:
+                    L.append(self.current[key])
+            while not self.q.empty():
+                L.append(self.q.get())
             self.taskdbmanager.Clear()
             self.taskdbmanager.StoreAll(L)
-            print "=====Task Saved====="
+            print "\n=====Task Saved====="
 
+    def ListenToClient(self,client,address):
+        size = 4096
+        datemodify = 0
+        print "Connect to {}".format(address)
+        while True:
+            with self.queue_lock:
+                if self.q.empty():
+                    break
+            try:
+                #job 0 number 1 date 2 direction 3 shift 4 distance
+                with self.queue_lock:
+                    job = self.q.get()
+                with self.current_lock:
+                    self.current[address] = job
+                print "Assign Task : {} {} {} {} {}".format(job[0],job[1],job[2],job[3],job[4])
+                client.sendall("{} {} {} {} {}".format(job[0],job[1],job[2],job[3],job[4]))
+                data = client.recv(size)
+                if data:
+                    try:
+                        receipt = json.loads(data)
+                    except:
+                        print data
+                        raise Exception('Wrong Format')
+                    with self.qdb_lock:
+                        self.qdb.put(receipt)
+                    datemodify = 0
+                    if receipt.get(job[0][0:2]+str(int(job[0][2:])+job[3]+job[4]-1),job[1])[0] != job[1]:
+                        datemodify = job[2]
+                    if len(receipt) >= job[4]-5:
+                        print "=====Add New Task====="
+                        with self.queue_lock:
+                            self.q.put((job[0],TimeConvert(job[1],datemodify),job[2],job[3]+job[4],job[4]))
+                    else:
+                        print "=====Search Reach The End====="          
+                else:
+                    print "no data"
+                    raise Exception('Client Disconnected')
+            except:
+                client.close()
+                print "Client Disconnected"
+                break
+        #with self.current_lock:
+            #with self.queue_lock:
+                #self.q.put(self.current[address])
+    
 if __name__ == '__main__':
     #log.basicConfig(level = log.DEBUG)
     T = TaskManager()
-    T.Connect()
-    T.Run()
-    T.Close()
+    T.Listen()
