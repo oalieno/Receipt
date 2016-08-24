@@ -1,4 +1,5 @@
 import sqlite3
+import sys
 
 class DBManager(object):
     def __init__(self):
@@ -15,7 +16,21 @@ class DBManager(object):
 
 if __name__ == '__main__':
     D = DBManager()
-    D.c.execute("SELECT COUNT(*) FROM receipt")
-    print "=====Total : ",D.c.fetchone(),"====="
-    #D.c.execute("SELECT * FROM receipt")
-    #print D.c.fetchall()
+    if len(sys.argv) != 2:
+        print 'USAGE :'
+        print '-create        Create Table'
+        print '-show -num     Show How many data in Table'
+        print '-show -all     Show All Data'
+    elif sys.argv[1][1:] == 'create':
+        D.CreateTable()
+    elif sys.argv[1][1:] == 'show':
+        if sys.argv[2][1:] == 'num':
+            D.c.execute("SELECT COUNT(*) FROM receipt")
+            print "=====Total : ",D.c.fetchone(),"====="
+        elif sys.argv[2][1:] == 'all':
+            D.c.execute("SELECT * FROM receipt")
+            print D.c.fetchall()
+	else:
+ 	    print 'wrong parameter!!'
+    else:
+        print 'wrong parameter!!'

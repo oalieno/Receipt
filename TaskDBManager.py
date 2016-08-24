@@ -1,4 +1,5 @@
 import sqlite3
+import sys
 
 class TaskDBManager(object):
     def __init__(self):
@@ -23,5 +24,14 @@ class TaskDBManager(object):
 
 if __name__ == '__main__':
     D = TaskDBManager()
-    D.c.execute("SELECT * FROM task")
-    print D.c.fetchall()
+    if len(sys.argv) != 2:
+        print 'USAGE : '
+        print '-create    Create Table'
+        print '-show      Show Table'
+    elif sys.argv[1][1:] == 'create':
+        D.CreateTable()
+    elif sys.argv[1][1:] == 'show':
+        D.c.execute("SELECT * FROM task")
+        print D.c.fetchall()
+    else:
+        print 'wrong parameter!!'

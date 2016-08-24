@@ -1,4 +1,5 @@
 import sqlite3
+import sys
 
 class ImgDBManager(object):
     def __init__(self):
@@ -17,5 +18,14 @@ class ImgDBManager(object):
 
 if __name__ == '__main__':
     D = ImgDBManager()
-    D.c.execute("SELECT * FROM image")
-    print D.c.fetchall()
+    if len(sys.argv) != 2:
+        print 'USAGE : '
+        print '-create    Create Table'
+        print '-show      Show Table'
+    elif sys.argv[1][1:] == 'create':
+        D.CreateTable()
+    elif sys.argv[1][1:] == 'show':
+        D.c.execute("SELECT * FROM image")
+        print D.c.fetchall()
+    else:
+        print 'wrong parameter!!'
