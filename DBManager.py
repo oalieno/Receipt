@@ -16,7 +16,7 @@ class DBManager(object):
 
 if __name__ == '__main__':
     D = DBManager()
-    if len(sys.argv) != 2:
+    if len(sys.argv) < 2:
         print 'USAGE :'
         print '-create        Create Table'
         print '-show -num     Show How many data in Table'
@@ -28,7 +28,7 @@ if __name__ == '__main__':
             D.c.execute("SELECT COUNT(*) FROM receipt")
             print "=====Total : ",D.c.fetchone(),"====="
         elif sys.argv[2][1:] == 'all':
-            D.c.execute("SELECT * FROM receipt")
+            D.c.execute("SELECT * FROM receipt ORDER BY id Asc")
             print D.c.fetchall()
 	else:
  	    print 'wrong parameter!!'

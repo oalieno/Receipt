@@ -87,7 +87,7 @@ class TaskManager(object):
                     if len(receipt) >= job[4]-5:
                         print "=====Add New Task====="
                         with self.queue_lock:
-                            self.q.put((job[0],TimeConvert(job[1],datemodify),job[2],job[3]+job[4],job[4]))
+                            self.q.put((job[0],TimeConvert(job[1],datemodify),job[2],job[3]+job[4]*job[2],job[4]))
                     else:
                         print "=====Search Reach The End====="          
                 else:

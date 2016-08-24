@@ -2,7 +2,7 @@ import os
 import re
 import hashlib
 import logging as log
-from PIL import Image,ImageEnhance
+#from PIL import Image,ImageEnhance
 from ImgDBManager import ImgDBManager
 
 class ImgResolver(object):
@@ -17,7 +17,8 @@ class ImgResolver(object):
             return MEM
         with open("image.jpeg",'w') as imagefile:
             imagefile.write(image) 
-        #Enhance image
+        '''
+	#Enhance image
         img = Image.open("image.jpeg")
         enhancer = ImageEnhance.Color(img)
         img = enhancer.enhance(0.0)
@@ -31,6 +32,7 @@ class ImgResolver(object):
         img = enhancer.enhance(0.0)
         img.save("image.jpeg")
         #Enhance image
+	'''
         self.captcha = os.popen("tesseract -l eng image.jpeg stdout").read().strip()
         log.debug("regex match : {}".format(re.match("\w{5}",self.captcha)))
         if len(self.captcha) == 5 and re.match("\w{5}",self.captcha):

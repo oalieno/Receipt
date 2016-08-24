@@ -9,7 +9,7 @@ while True:
         if len(number) != 10:
             print "format wrong"
             continue
-        date = raw_input("date:")
+        date = raw_input("date(XXX/XX/XX):")
         if len(date) != 9 or date[3] != '/' or date[6] != '/':
             print "format wrong"
             continue
