@@ -26,10 +26,17 @@ if __name__ == '__main__':
     elif sys.argv[1][1:] == 'show':
         if sys.argv[2][1:] == 'num':
             D.c.execute("SELECT COUNT(*) FROM receipt")
-            print "=====Total : ",D.c.fetchone(),"====="
+            print "=====Total : "+repr(D.c.fetchone()[0])+"====="
         elif sys.argv[2][1:] == 'all':
             D.c.execute("SELECT * FROM receipt ORDER BY id Asc")
-            print D.c.fetchall()
+            result = D.c.fetchall()
+	    print len(result)
+	    print "id\t\tdate\t\tmoney"
+	    for i in range(len(result)-1):
+                print result[i][0]+'\t'+result[i][1]+'\t'+str(result[i][2])
+		if(int(result[i][0][2:])-int(result[i+1][0][2:]) > 1):
+		    print "=====fault zone====="
+            print result[len(result)-1][0]+'\t'+result[len(result)-1][1]+'\t'+str(result[len(result)-1][2])
 	else:
  	    print 'wrong parameter!!'
     else:

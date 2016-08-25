@@ -5,6 +5,7 @@ import sys
 import Queue
 import time
 import logging as log
+from collections import Counter
 from TimeConvert import TimeConvert
 from DBManager import DBManager
 from TaskDBManager import TaskDBManager
@@ -81,25 +82,24 @@ class TaskManager(object):
                         raise Exception('Wrong Format')
                     with self.qdb_lock:
                         self.qdb.put(receipt)
-                    datemodify = 0
-                    if receipt.get(job[0][0:2]+str(int(job[0][2:])+job[3]+job[4]-1),job[1])[0] != job[1]:
-                        datemodify = job[2]
+		    datelist = []
+  		    for key in receipt:
+			datelist.append(receipt[key][0])
                     if len(receipt) >= job[4]-5:
                         print "=====Add New Task====="
                         with self.queue_lock:
-                            self.q.put((job[0],TimeConvert(job[1],datemodify),job[2],job[3]+job[4]*job[2],job[4]))
+                            self.q.put((job[0],Counter(datelist).most_common(1)[0][0],job[2],job[3]+job[4],job[4]))
                     else:
                         print "=====Search Reach The End====="          
                 else:
-                    print "no data"
                     raise Exception('Client Disconnected')
-            except:
+            except Exception as e:
+		print "====="+str(e)+"====="
                 client.close()
-                print "Client Disconnected"
                 break
-        #with self.current_lock:
-            #with self.queue_lock:
-                #self.q.put(self.current[address])
+        with self.current_lock:
+            with self.queue_lock:
+                self.q.put(self.current[address])
     
 if __name__ == '__main__':
     #log.basicConfig(level = log.DEBUG)

@@ -81,7 +81,7 @@ class Connector(object):
         _ABC = number[:2]
         _123 = int(number[2:])
         for i in range(shift,shift+distance):
-            money = self.Hack(_ABC+str(_123+i*direction),date)
+	    money = self.Hack(_ABC+str(_123+i*direction),date)
             if money == 0:
                 log.debug("=====date modify=====")
                 _date = TimeConvert(date,direction)
@@ -91,16 +91,10 @@ class Connector(object):
                     date = _date
                 else:
                     unknown += 1
+            print _ABC+str(_123+i*direction),date,money
             if unknown >= 5:
                 break
             if money != 0:
                 receipt[_ABC+str(_123+i*direction)] = [date,money]
         return receipt
 
-if __name__ == '__main__':
-    log.basicConfig(level = log.INFO)
-    C = Connector()
-    print "Welcome to Receipt Crawlers World!!"
-    number = raw_input("Number:").strip()
-    date = raw_input("Date:").strip()
-    C.Task(number,date,1,0,10)

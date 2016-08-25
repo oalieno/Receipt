@@ -1,6 +1,7 @@
 import socket
 import json
-import logging as log
+import sys
+import logging as logi
 from Connector import Connector
 
 C = Connector()
@@ -22,6 +23,6 @@ try:
         receipt = C.Task(data[0],data[1],int(data[2]),int(data[3]),int(data[4]))
         sock.sendall(json.dumps(receipt))
         print "Task done!!"
-except:
-    print "\nSomething Happened... Crawler Closed"
+except Exception as e:
+    print e
     sock.close()
