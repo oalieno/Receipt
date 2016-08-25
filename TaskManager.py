@@ -11,7 +11,7 @@ from DBManager import DBManager
 from TaskDBManager import TaskDBManager
 
 class TaskManager(object):
-    def __init__(self):
+    def __init__(self,address):
         self.qdb = Queue.Queue()
         self.qdb_lock = threading.Lock()
         self.taskdbmanager = TaskDBManager()
@@ -19,7 +19,7 @@ class TaskManager(object):
         self.current_lock = threading.Lock()
         self.sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
         self.sock.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
-        self.sock.bind(('localhost',5555))
+        self.sock.bind((address,5555))
         self.q = Queue.Queue()
         self.queue_lock = threading.Lock()
         for i in self.taskdbmanager.GetData():
@@ -103,5 +103,8 @@ class TaskManager(object):
     
 if __name__ == '__main__':
     #log.basicConfig(level = log.DEBUG)
-    T = TaskManager()
+    address = "localhost"
+    if len(sys.argv) == 2:
+	address = sys.argv[1]
+    T = TaskManager(address)
     T.Listen()

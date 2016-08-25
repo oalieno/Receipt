@@ -6,7 +6,10 @@ from Connector import Connector
 
 C = Connector()
 
-server = ('localhost',5555)
+address = 'localhost'
+if len(sys.argv) == 2:
+    address = sys.argv[1]
+server = (address,5555)
 
 sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 sock.connect(server)
